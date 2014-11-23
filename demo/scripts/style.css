@@ -1,0 +1,29 @@
+/* Citations */
+cite {
+    color: #666;
+    font-size: 12pt;
+}
+cite:before {
+    content: '[';
+}
+cite:after {
+    content: ']';
+}
+
+span.ref {
+    margin-right: 10px;
+}
+span.ref:before {
+    content: '[';
+}
+span.ref:after {
+    content: ']';
+}
+
+span.author {
+    
+}
+
+span.title {
+    font-style: italic;
+}
