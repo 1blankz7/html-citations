@@ -5,12 +5,13 @@ import lxml.html as ET
 class CitationSystem:
     """
     """
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, source_file_name, output_file_name):
+        self.source_file_name = source_file_name
+        self.output_file_name = output_file_name
 
     def run(self):
-        # load file that was specified with filename
-        xml_tree = self.load(self.filename)
+        # load file that was specified with source_file_name
+        xml_tree = self.load(self.source_file_name)
         xml_root = xml_tree.getroot()
         # parse loaded file
         data = self.parse_xml(xml_root)
@@ -18,7 +19,7 @@ class CitationSystem:
         bibdata = self.load_bibtex(data['bibliography'])
         structure = self.build_structure(bibdata, data['cites'])
         self.replace_citations(xml_root, structure)
-        xml_tree.write('index.html', method='html')
+        xml_tree.write(self.output_file_name, method='html')
 
     def load(self, filename):
         """Load a html/xml file in a processable format.
@@ -134,18 +135,18 @@ class IEEEStyler:
 
 
 if __name__ == '__main__':
-    import sys
+    import argparse
 
-    help_txt = """Citation system
+    parser = argparse.ArgumentParser(description='Citation system.')
+    parser.add_argument('input_filename', metavar='i', type=str, nargs=1,
+                        help='the path of the input file')
+    parser.add_argument('output_filename', metavar='o', type=str, nargs=1,
+                        help='sum the integers (default: find the max)')
 
-Please specify the file, that should be parsed.
+    args = parser.parse_args()
 
-Usage: python3 cite.py <filename>
-"""
-
-    if len(sys.argv) > 1:
-        filename = sys.argv[1]
-        cs = CitationSystem(filename)
-        cs.run()
-    else:
-        print(help_txt)
+    input_filename = args.input_filename
+    output_filename = args.output_filename
+    print(args)
+    cs = CitationSystem(input_filename, output_filename)
+    cs.run()
