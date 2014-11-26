@@ -10,6 +10,14 @@ cite:after {
     content: ']';
 }
 
+bibliography li {
+    list-style: none;
+}
+
+bibliography li span {
+    margin-right: 5px;
+}
+
 span.ref {
     margin-right: 10px;
 }
@@ -20,7 +28,7 @@ span.ref:after {
     content: ']';
 }
 
-span.author {
+span.authors {
     
 }
 

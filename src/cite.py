@@ -1,5 +1,6 @@
 from pybtex.database.input import bibtex
 import lxml.html as ET
+import citation_style
 
 
 class CitationSystem:
@@ -88,7 +89,8 @@ class CitationSystem:
         bib = list(xml_data.iter('bibliography'))
         bib[0].text = ""
         for e in entries:
-            bib[0].append(IEEEStyler.create(e))
+            bib[0].append(citation_style.styling(
+                e['entry'], number=e['number']))
 
     def report(self):
         """Creates a report with some information that could be logged.
@@ -99,54 +101,20 @@ class CitationSystem:
         return "<CitationSystem(%s)>" % self.filename
 
 
-class IEEEStyler:
-    """
-    """
-    @classmethod
-    def format_author(cls, person):
-        return "%s. %s" % (
-            person.get_part_as_text('first')[0],
-            person.get_part_as_text('last'))
-
-    @classmethod
-    def create(cls, bib_entry):
-        from lxml.html import builder as E
-        author_text = ""
-        authors = [IEEEStyler.format_author(a)
-                    for a in bib_entry['entry'].persons['Author']]
-
-        author_text = " and ".join(authors)
-
-        base = E.LI(
-            E.SPAN(E.CLASS('ref'), str(bib_entry['number'])),
-            E.SPAN(E.CLASS('author'), "%s, " % author_text),
-            E.SPAN(
-                E.CLASS('title'),
-                "%s. " % str(bib_entry['entry'].fields['Title'])),
-            #E.SPAN(
-            # E.CLASS('published'),
-            # "%s, " % str(bib_entry['entry'].fields['Publisher'])),
-            E.SPAN(
-                E.CLASS('year'),
-                "%s." % str(bib_entry['entry'].fields['Year']))
-        )
-
-        return base
-
-
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Citation system.')
-    parser.add_argument('input_filename', metavar='i', type=str, nargs=1,
+    parser.add_argument('input_filename', type=str, nargs=1,
                         help='the path of the input file')
-    parser.add_argument('output_filename', metavar='o', type=str, nargs=1,
-                        help='sum the integers (default: find the max)')
+    parser.add_argument('output_filename', type=str, nargs=1,
+                        help='the path of the output file; " + \
+                            "can be the same as the input file')
 
     args = parser.parse_args()
 
-    input_filename = args.input_filename
-    output_filename = args.output_filename
-    print(args)
+    input_filename = args.input_filename[0]
+    output_filename = args.output_filename[0]
+
     cs = CitationSystem(input_filename, output_filename)
     cs.run()

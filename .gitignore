@@ -89,3 +89,6 @@ target/
 
 # Editors
 .idea
+
+# Tests
+demo/outdex.html
