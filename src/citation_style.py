@@ -7,7 +7,7 @@ def get(entry, field, apply_func=None):
     e = entry.fields[field]
     if apply_func is not None:
         e = apply_func(e)
-    return (field, e)
+    return field, e
 
 
 def if_next(value):
@@ -20,13 +20,13 @@ def optional(entry, field, apply_func=None):
     try:
         return get(entry, field, apply_func)
     except KeyError:
-        return (field, None)
+        return field, None
 
 
 def present(opt):
     if type(opt) == list:
         for el in opt[:2]:
-            if not isinstance(el, type.FunctionType):
+            if not isinstance(el, types.FunctionType):
                 return present(el)
     elif type(opt) == tuple:
         return opt[1] is not None
@@ -36,19 +36,22 @@ def flat(opt_arr):
     text = []
     for idx in range(len(opt_arr)):
         el = opt_arr[idx]
-        if isinstance(el, type.FunctionType):
-            text.append(el(opt_arr[idx+1]))
+        if isinstance(el, types.FunctionType):
+            func_res = el(opt_arr[idx+1])
+            if func_res is not None:
+                text.append(func_res)
+            else:
+                break
         else:
             text.append(el)
-    return text
+    return filter(lambda x: x[1] is not None, text)
 
 
-class IEEEStyler(BaseStyle):
+class IEEEStyle(BaseStyle):
     """
     """
 
-    def format_name(self, person):
-        print(person)
+    def format_person(self, person):
         first = person.get_part_as_text('first')
         last = person.get_part_as_text('last')
         if len(first) > 0 and len(last) > 0:
@@ -64,20 +67,20 @@ class IEEEStyler(BaseStyle):
     def format_names(self, e, role):
         text = ""
 
-        names = list([self.format_name(a) for a in e.persons[role]])
+        names = list([self.format_person(a) for a in e.persons[role]])
         
         if len(names) > 0:
             text = " and ".join(names)
-            return text
+            return ('authors', text)
         else:
             return (None, None)
 
     def format_author_or_editor(self, e):
         author = self.format_names(e, 'author')
         if not present(author):
-            return ('editor', self.format_editor(e))
+            return self.format_editor(e)
         else:
-            return ('author', author)
+            return author
 
     def format_editor(self, e):
         editors = self.format_names(e, 'editor')
@@ -91,7 +94,7 @@ class IEEEStyler(BaseStyle):
         else:
             word = 'editor'
         result = ', '.join([editors, word])
-        return result
+        return ('editor', result)
 
     def format_volume_and_series(self, e):
         volume_and_series = [
@@ -426,7 +429,7 @@ def html(entry):
         E.SPAN(entry.text))
 
 
-def styling(entries, styler=IEEEStyler()):
+def styling(entries, styler=IEEEStyle()):
     """
     """
     # build structure for citation with specific formatters
