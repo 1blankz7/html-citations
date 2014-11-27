@@ -13,11 +13,14 @@ def get(entry, field, apply_func=None):
 def if_next(value):
     def f(n, m):
         return (None, str(value)) if present(n) else None
+
     return f
+
 
 def if_prev_and_next(value):
     def f(n, m):
         return (None, str(value)) if present(n) and present(m) else None
+
     return f
 
 
@@ -42,7 +45,7 @@ def flat(opt_arr):
     for idx in range(len(opt_arr)):
         el = opt_arr[idx]
         if isinstance(el, types.FunctionType):
-            func_res = el(opt_arr[idx+1], opt_arr[idx-1] if idx>0 else None)
+            func_res = el(opt_arr[idx + 1], opt_arr[idx - 1] if idx > 0 else None)
             if func_res is not None:
                 text.append(func_res)
             else:
@@ -73,7 +76,7 @@ class IEEEStyle(BaseStyle):
         text = ""
 
         names = list([self.format_person(a) for a in e.persons[role]])
-        
+
         if len(names) > 0:
             text = " and ".join(names)
             return ('authors', text)
@@ -156,6 +159,7 @@ class IEEEStyle(BaseStyle):
                     c = c.lower()
                 result += c
             return '"%s"' % result
+
         return get(e, 'title', apply_func=protected_capitalize)
 
     def format_address_publisher_date(self, e):
@@ -202,240 +206,202 @@ class IEEEStyle(BaseStyle):
         ]
 
     def format_book(self, e):
-        template = toplevel [
-            self.format_author_or_editor(e),
-            self.format_btitle(e, 'title'),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
             self.format_volume_and_series(e),
-            sentence [
-                field('publisher'),
-                optional_field('address'),
+            [
+                get(e, 'publisher'),
+                optional(e, 'address'),
                 self.format_edition(e),
-                date
+                self.format_date(e)
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
             self.format_web_refs(e),
         ]
         return template.format_data(e)
 
     def format_booklet(self, e):
-        template = toplevel [
-            self.format_names('author'),
-            self.format_title(e, 'title'),
-            sentence [
-                optional_field('howpublished'),
-                optional_field('address'),
-                date,
-                optional_field('note'),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            self.format_chapter_and_pages(e),
+            [
+                optional(e, 'howpublished'),
+                optional(e, 'address'),
+                self.format_date(e)
             ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_inbook(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            sentence [
-                self.format_btitle(e, 'title'),
-                self.format_chapter_and_pages(e),
-            ],
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            self.format_chapter_and_pages(e),
             self.format_volume_and_series(e),
-            sentence [
-                field('publisher'),
-                optional_field('address'),
-                optional [
-                    words [field('edition'), 'edition']
-                ],
-                date,
-                optional_field('note'),
+            [
+                get(e, 'publisher'),
+                optional(e, 'address'),
+                self.format_edition(e),
+                self.format_date(e)
             ],
-            self.format_web_refs(e),
+            self.format_web_refs(e)
         ]
-        return template.format_data(e)
 
     def format_incollection(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            self.format_title(e, 'title'),
-            words [
-                'In',
-                sentence(capfirst=False) [
-                    optional[ self.format_editor(e, as_sentence=False) ],
-                    self.format_btitle(e, 'booktitle', as_sentence=False),
-                    self.format_volume_and_series(e, as_sentence=False),
-                    self.format_chapter_and_pages(e),
-                ],
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            [
+                ('book', 'In'),
+                self.format_editor(e),
+                get(e, 'booktitle'),
+                self.format_volume_and_series(e),
+                self.format_chapter_and_pages(e)
             ],
-            sentence [
-                optional_field('publisher'),
-                optional_field('address'),
+            [
+                optional(e, 'publisher'),
+                optional(e, 'address'),
                 self.format_edition(e),
-                date,
+                self.format_date(e)
             ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_inproceedings(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            self.format_title(e, 'title'),
-            words [
-                'In',
-                sentence(capfirst=False) [
-                    optional[ self.format_editor(e, as_sentence=False) ],
-                    self.format_btitle(e, 'booktitle', as_sentence=False),
-                    self.format_volume_and_series(e, as_sentence=False),
-                    optional[ pages ],
-                ],
-                self.format_address_organization_publisher_date(e),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            [
+                ('book', 'In'),
+                self.format_editor(e),
+                get(e, 'booktitle'),
+                self.format_volume_and_series(e),
+                optional(e, 'pages'),
+                self.format_address_publisher_date(e),
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_manual(self, e):
-        # TODO this only corresponds to the bst style if author is non-empty
-        # for empty author we should put the organization first
-        template = toplevel [
-            optional [ sentence [ self.format_names('author') ] ],
-            self.format_btitle(e, 'title'),
-            sentence [
-                optional_field('organization'),
-                optional_field('address'),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e, 'title'),
+            [
+                optional(e, 'organization'),
+                optional(e, 'address'),
                 self.format_edition(e),
-                optional[ date ],
+                self.format_date(e)
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_mastersthesis(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            self.format_title(e, 'title'),
-            sentence[
-                "Master's thesis",
-                field('school'),
-                optional_field('address'),
-                date,
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            [
+                ('master_thesis', 'Master\'s thesis'),
+                get(e, 'school'),
+                optional(e, 'address'),
+                self.format_date(e)
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_misc(self, e):
-        template = toplevel [
-            optional[ sentence [self.format_names('author')] ],
-            optional[ self.format_title(e, 'title') ],
-            sentence[
-                optional[ field('howpublished') ],
-                optional[ date ],
-            ],
-            sentence(capfirst=False) [ optional_field('note') ],
-            self.format_web_refs(e),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            optional('howpublished'),
+            self.format_date(e),
+            self.format_web_refs(e)
         ]
-        return template.format_data(e)
 
     def format_phdthesis(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            self.format_btitle(e, 'title'),
-            sentence[
-                'PhD thesis',
-                field('school'),
-                optional_field('address'),
-                date,
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            [
+                ('phd_thesis', 'PhD thesis'),
+                get(e, 'school'),
+                optional(e, 'address'),
+                self.format_date(e)
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_proceedings(self, e):
-        template = toplevel [
-            first_of [
-                # there are editors
-                optional [
-                    join(' ')[
-                        self.format_editor(e),
-                        sentence [
-                            self.format_btitle(e, 'title', as_sentence=False),
-                            self.format_volume_and_series(e, as_sentence=False),
-                            self.format_address_organization_publisher_date(e),
-                        ],
-                    ],
-                ],
-                # there is no editor
-                optional_field('organization'),
-                sentence [
-                    self.format_btitle(e, 'title', as_sentence=False),
-                    self.format_volume_and_series(e, as_sentence=False),
-                    self.format_address_organization_publisher_date(
-                        e, include_organization=False),
-                ],
-            ],
-            sentence(capfirst=False) [ optional_field('note') ],
-            self.format_web_refs(e),
-        ]
-        return template.format_data(e)
+        editors = self.format_editor(e)
+        if present(editors):
+            template = [
+                editors,
+                self.format_title(e),
+                self.format_volume_and_series(e),
+                self.format_address_publisher_date(e),
+            ]
+        else:
+            template = [
+                optional(e, 'organization'),
+                self.format_title(e),
+                self.format_volume_and_series(e),
+                self.format_address_publisher_date(e),
+            ]
+
+        return template + self.format_web_refs(e)
 
     def format_techreport(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
+        return [
+            self.format_names(e, 'author'),
             self.format_title(e, 'title'),
-            sentence [
-                words[
-                    first_of [
-                        optional_field('type'),
-                        'Technical Report',
-                    ],
-                    optional_field('number'),
-                ],
-                field('institution'),
-                optional_field('address'),
-                date,
+            [
+                optional(e, 'type'),
+                (None, 'Technical Report'),
+                optional(e, 'number'),
+                get(e, 'institution')
             ],
-            sentence(capfirst=False) [ optional_field('note') ],
-            self.format_web_refs(e),
+            optional(e, 'address'),
+            self.format_date(e),
+            self.format_web_refs(e)
         ]
-        return template.format_data(e)
 
     def format_unpublished(self, e):
-        template = toplevel [
-            sentence [self.format_names('author')],
-            self.format_title(e, 'title'),
-            sentence(capfirst=False) [
-                field('note'),
-                optional[ date ]
-            ],
-            self.format_web_refs(e),
+        return [
+            self.format_names(e, 'author'),
+            self.format_title(e),
+            self.format_date(e),
+            self.format_web_refs(e)
         ]
-        return template.format_data(e)
 
     def format_other(self, e):
-        template = toplevel[
+        return [
             self.format_names(e.authors),
             self.format_title(e.title),
-            sentence(capfirst=False)[optional_field('note')],
-            self.format_web_refs(e),
+            self.format_web_refs(e)
         ]
-        return template.format_data(e)
 
 
 def html(entry):
     """
     FormattedEntry
     """
-    return E.LI(
-        E.SPAN(E.CLASS('ref'), entry.label),
-        E.SPAN(entry.text))
+
+    def to_html(el):
+        return E.SPAN(E.CLASS(el[0]), el[1]) if el[0] is not None else E.SPAN(el[1])
+
+    base = E.SPAN()
+    for e in entry.text:
+        if type(e) == tuple and e[1] is not None:
+            base.append(to_html(e))
+        else:
+            for ee in e:
+                if type(ee) == tuple and ee[1] is not None:
+                    base.append(to_html(ee))
+
+    return E.LI(E.SPAN(E.CLASS('ref'), entry.label), base)
 
 
 def styling(entries, styler=IEEEStyle()):
     """
     """
-    # build structure for citation with specific formatters
     return styler.format_entries(entries)

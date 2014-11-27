@@ -1,7 +1,8 @@
 __author__ = 'christian'
 
 import unittest
-from html_citation.citation_style import if_next, optional, get, present, if_prev_and_next, flat
+from html_citation.citation_style import (if_next, optional, html,
+                              get, present, if_prev_and_next, flat)
 
 
 class E:
@@ -59,3 +60,16 @@ class TestCitationStyle(unittest.TestCase):
             optional(entry, 'foo')
         ]
         self.assertEqual("1", "".join([str(v[1]) for v in flat(data)]))
+
+    def test_html(self):
+        entry = E()
+        entry.label = '1'
+        entry.text = [
+            ('authors', 'D. Alexiadis and D. Zarpalas and Daras'),
+            ('title', '"Real-time, full 3-d reconstruction of moving foreground objects from multiple consumer depth cameras"'),
+            ('journal', 'IEEE Transactions on Multimedia'),
+            [('volume', '15'), ('number', '(2)'), (None, ':'), ('pages', '339--358')],
+            [('month', None), ('year', '2013')],
+            [('url', None), ('doi', None)]
+        ]
+        self.assertEqual("", html(entry))

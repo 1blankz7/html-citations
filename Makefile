@@ -8,3 +8,6 @@ install:
 
 test:
 	$(PYTHON) -m unittest
+
+demo:
+    $(PYTHON) app.py demo/index.html demo/out.html

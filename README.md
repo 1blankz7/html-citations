@@ -22,7 +22,7 @@ If you have an `index.html` file with a cite like the following
 ```
 and you perform the command
 ```
-python3 cite.py index.html
+python3 app.py index.html index.html
 ```
 you will get a updated file
 ```
