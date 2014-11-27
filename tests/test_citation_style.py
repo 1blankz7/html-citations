@@ -1,18 +1,18 @@
 __author__ = 'christian'
 
 import unittest
-import citation_style
+import html_citation.citation_style as cs
 
 
 class E:
     pass
 
 
-if_next = citation_style.if_next
-optional = citation_style.optional
-get = citation_style.get
-present = citation_style.present
-flat = citation_style.flat
+if_next = cs.if_next
+optional = cs.optional
+get = cs.get
+present = cs.present
+flat = cs.flat
 
 
 class TestCitationStyle(unittest.TestCase):
@@ -21,21 +21,20 @@ class TestCitationStyle(unittest.TestCase):
         entry = E()
         entry.fields = {'foo': 1}
 
-        self.assertEquals(('foo', 1), get(entry, 'foo'))
+        self.assertEqual(('foo', 1), get(entry, 'foo'))
         self.assertRaises(KeyError, get, entry, 'bar')
-        self.assertEquals(('foo', 2), get(entry, 'foo', apply_func= lambda x: 2*x))
+        self.assertEqual(('foo', 2), get(entry, 'foo', apply_func= lambda x: 2*x))
 
     def test_if_next(self):
-        self.assertEquals((None, "+"), if_next("+")(('foo', 1)))
+        self.assertEqual((None, "+"), if_next("+")(('foo', 1)))
         self.assertFalse((None, "+") == if_next("+")(('foo', None)))
-
 
     def test_optional(self):
         entry = E()
         entry.fields = {'foo': 1}
 
-        self.assertEquals(('foo', 1), optional(entry, 'foo'))
-        self.assertEquals(('bar', None), optional(entry, 'bar'))
+        self.assertEqual(('foo', 1), optional(entry, 'foo'))
+        self.assertEqual(('bar', None), optional(entry, 'bar'))
 
     def test_present(self):
         self.assertTrue(present(('foo', 1)))
@@ -50,7 +49,7 @@ class TestCitationStyle(unittest.TestCase):
             if_next("Hello"),
             optional(entry, 'foo')
         ]
-        self.assertEquals("Hello1", "".join([str(v[1]) for v in flat(data)]))
+        self.assertEqual("Hello1", "".join([str(v[1]) for v in flat(data)]))
         data = [
             if_next("Hello"),
             optional(entry, 'foo'),
@@ -59,11 +58,11 @@ class TestCitationStyle(unittest.TestCase):
         ]
         flatted = flat(data)
         flatted = list(flatted)
-        self.assertEquals("Hello1", "".join([str(v[1]) for v in flatted]))
+        self.assertEqual("Hello1", "".join([str(v[1]) for v in flatted]))
         data = [
             if_next("Hello"),
             optional(entry, 'bar'),
             if_next("World"),
             optional(entry, 'foo')
         ]
-        self.assertEquals("", "".join([str(v[1]) for v in flat(data)]))
+        self.assertEqual("", "".join([str(v[1]) for v in flat(data)]))

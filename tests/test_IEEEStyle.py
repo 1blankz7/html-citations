@@ -1,6 +1,6 @@
 import unittest
 from pybtex.database.input import bibtex
-from citation_style import IEEEStyle
+from html_citation.citation_style import IEEEStyle
 import io
 
 
@@ -20,6 +20,7 @@ TEST_BIBTEX = """
 }
 """
 
+
 class TestIEEEStyle(unittest.TestCase):
 
     def setUp(self):
@@ -31,19 +32,19 @@ class TestIEEEStyle(unittest.TestCase):
     def test_format_name(self):
         author1 = self.entry.persons['Author'][0]
         author3 = self.entry.persons['Author'][2]
-        self.assertEquals("D. Alexiadis", self.style.format_person(author1))
-        self.assertEquals("Daras", self.style.format_person(author3))
+        self.assertEqual("D. Alexiadis", self.style.format_person(author1))
+        self.assertEqual("Daras", self.style.format_person(author3))
 
     def test_format_doi(self):
-        self.assertEquals(('doi', None), self.style.format_doi(self.entry))
+        self.assertEqual(('doi', None), self.style.format_doi(self.entry))
 
     def test_format_names(self):
-        self.assertEquals(
+        self.assertEqual(
             "D. Alexiadis and D. Zarpalas and Daras",
             self.style.format_names(self.entry, "author")[1])
 
     def test_format_author_or_editor(self):
-        self.assertEquals(
+        self.assertEqual(
             ('authors', "D. Alexiadis and D. Zarpalas and Daras"),
             self.style.format_author_or_editor(self.entry))
 
