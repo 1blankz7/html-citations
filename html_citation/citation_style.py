@@ -11,8 +11,13 @@ def get(entry, field, apply_func=None):
 
 
 def if_next(value):
-    def f(n):
+    def f(n, m):
         return (None, str(value)) if present(n) else None
+    return f
+
+def if_prev_and_next(value):
+    def f(n, m):
+        return (None, str(value)) if present(n) and present(m) else None
     return f
 
 
@@ -37,14 +42,14 @@ def flat(opt_arr):
     for idx in range(len(opt_arr)):
         el = opt_arr[idx]
         if isinstance(el, types.FunctionType):
-            func_res = el(opt_arr[idx+1])
+            func_res = el(opt_arr[idx+1], opt_arr[idx-1] if idx>0 else None)
             if func_res is not None:
                 text.append(func_res)
             else:
-                break
+                continue
         else:
             text.append(el)
-    return filter(lambda x: x[1] is not None, text)
+    return list(filter(lambda x: x[1] is not None, text))
 
 
 class IEEEStyle(BaseStyle):
@@ -122,7 +127,7 @@ class IEEEStyle(BaseStyle):
     def format_chapter_and_pages(self, e):
         return flat([
             optional(e, 'chapter'),
-            if_next(','),
+            if_prev_and_next(','),
             optional(e, 'pages')
         ])
 
@@ -153,13 +158,13 @@ class IEEEStyle(BaseStyle):
             return '"%s"' % result
         return get(e, 'title', apply_func=protected_capitalize)
 
-    def format_address_organization_publisher_date(self, e):
+    def format_address_publisher_date(self, e):
         """Format address, publisher and date.
         Everything is optional, except the date.
         """
         address = optional(e, 'address')
         publisher = optional(e, 'publisher')
-        date = get(e, 'date')
+        date = self.format_date(e)
         if present(address):
             return [address, date, publisher]
         else:
@@ -189,7 +194,7 @@ class IEEEStyle(BaseStyle):
             volume_and_pages = [(None, 'pages'), pages]
         return [
             self.format_author_or_editor(e),
-            self.format_title(e, 'title'),
+            self.format_title(e),
             get(e, 'journal'),
             volume_and_pages,
             self.format_date(e),

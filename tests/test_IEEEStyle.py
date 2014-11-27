@@ -52,28 +52,47 @@ class TestIEEEStyle(unittest.TestCase):
         self.assertRaises(KeyError, self.style.format_editor, self.entry)
 
     def test_format_volume_and_series(self):
-        self.fail()
+        self.assertEqual(
+            [(None, "volume"), ('volume', '15')],
+            self.style.format_volume_and_series(self.entry))
 
     def test_format_chapter_and_pages(self):
-        self.fail()
+        self.assertEqual(
+            [('pages', '339--358')],
+            self.style.format_chapter_and_pages(self.entry))
 
     def test_format_edition(self):
-        self.fail()
+        self.assertEqual(
+            ('edition', None),
+            self.style.format_edition(self.entry))
 
     def test_format_date(self):
-        self.fail()
+        self.assertEqual(
+            [('month', None), ('year', '2013')],
+            self.style.format_date(self.entry))
 
     def test_format_title(self):
-        self.fail()
+        self.assertEqual(
+            ('title', '"Real-time, full 3-d reconstruction of moving foreground objects from multiple consumer depth cameras"'),
+            self.style.format_title(self.entry))
 
-    def test_format_address_organization_publisher_date(self):
-        self.fail()
+    def test_format_address_publisher_date(self):
+        self.assertEqual(
+            [('publisher', 'IEEE'), [('month', None), ('year', '2013')]],
+            self.style.format_address_publisher_date(self.entry))
 
     def test_format_url(self):
-        self.fail()
-
-    def test_format_web_refs(self):
-        self.fail()
+        self.assertEqual(
+            ('url', None),
+            self.style.format_url(self.entry))
 
     def test_format_article(self):
-        self.fail()
+        self.assertEqual(
+            [
+                ('authors', 'D. Alexiadis and D. Zarpalas and Daras'),
+                ('title', '"Real-time, full 3-d reconstruction of moving foreground objects from multiple consumer depth cameras"'),
+                ('journal', 'IEEE Transactions on Multimedia'),
+                [('volume', '15'), ('number', '(2)'), (None, ':'), ('pages', '339--358')],
+                [('month', None), ('year', '2013')],
+                [('url', None), ('doi', None)]],
+            self.style.format_article(self.entry))
