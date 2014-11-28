@@ -1,8 +1,7 @@
 HTML citations
 ==============
 
-Use your BibTeX files in your website or your HTML presentation.
-
+Use your BibTeX files in your website or your HTML presentation. This app also works with markdown files, so you can combine this maybe with Jekyll. In case of markdown the app generates some extra tags, that should be removed after processing. This step will be automated in a later version.
 
 ## Install
 
@@ -33,4 +32,11 @@ you will get a updated file
 ...
 ```
 
+## Styles
 
+At the moment I have only implemented most of the IEEE referencing style. This could also be improved in the future, but I don't need it for my own work.
+
+## Dependencies
+
+ * `lxml` for html parsing
+ * `pybtex` for BibTeX parsing 

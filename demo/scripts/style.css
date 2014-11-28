@@ -14,7 +14,7 @@ bibliography li {
     list-style: none;
 }
 
-bibliography li span {
+bibliography li span.month {
     margin-right: 5px;
 }
 

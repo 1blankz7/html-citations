@@ -33,11 +33,19 @@ def optional(entry, field, apply_func=None):
 
 def present(opt):
     if type(opt) == list:
-        for el in opt[:2]:
+        for el in opt:
             if not isinstance(el, types.FunctionType):
-                return present(el)
+                if present(el):
+                    return True
+        return False
     elif type(opt) == tuple:
         return opt[1] is not None
+
+
+comma = (None, ', ')
+
+
+dot = (None, '.')
 
 
 def flat(opt_arr):
@@ -186,6 +194,9 @@ class IEEEStyle(BaseStyle):
     def format_article(self, e):
         pages = get(e, 'pages')
         volume = optional(e, 'volume')
+        refs = self.format_web_refs(e)
+        if present(refs):
+            refs.insert(0, comma)
 
         if present(volume):
             volume_and_pages = [
@@ -198,11 +209,16 @@ class IEEEStyle(BaseStyle):
             volume_and_pages = [(None, 'pages'), pages]
         return [
             self.format_author_or_editor(e),
+            comma,
             self.format_title(e),
+            comma,
             get(e, 'journal'),
+            comma,
             volume_and_pages,
+            comma,
             self.format_date(e),
-            self.format_web_refs(e),
+            refs,
+            dot
         ]
 
     def format_book(self, e):
@@ -218,7 +234,6 @@ class IEEEStyle(BaseStyle):
             ],
             self.format_web_refs(e),
         ]
-        return template.format_data(e)
 
     def format_booklet(self, e):
         return [
@@ -387,7 +402,8 @@ def html(entry):
     """
 
     def to_html(el):
-        return E.SPAN(E.CLASS(el[0]), el[1]) if el[0] is not None else E.SPAN(el[1])
+        return E.SPAN(E.CLASS(el[0]), el[1]) \
+            if el[0] is not None else E.SPAN(el[1])
 
     base = E.SPAN()
     for e in entry.text:
